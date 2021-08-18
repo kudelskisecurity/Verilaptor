@@ -94,11 +94,18 @@ void tick_fault_r10(std::unique_ptr<Vaes_192_sed>& top, int sbox_num, int value)
     top->clk = 0;
 }
 
-void write_result(std::unique_ptr<Vaes_192_sed>& top, std::ofstream& file) {
+void write_result(std::unique_ptr<Vaes_192_sed>& top, std::ofstream& file, bool verbose) {
     file << std::setw(8) << std::setfill('0') << std::hex << top->out[3];
     file << std::setw(8) << std::setfill('0') << std::hex << top->out[2];
     file << std::setw(8) << std::setfill('0') << std::hex << top->out[1];
-    file << std::setw(8) << std::setfill('0') << std::hex << top->out[0] << '\n';;
+    file << std::setw(8) << std::setfill('0') << std::hex << top->out[0] << '\n';
+
+    if (verbose) {
+        std::cout << std::setw(8) << std::setfill('0') << std::hex << top->out[3];
+        std::cout << std::setw(8) << std::setfill('0') << std::hex << top->out[2];
+        std::cout << std::setw(8) << std::setfill('0') << std::hex << top->out[1];
+        std::cout << std::setw(8) << std::setfill('0') << std::hex << top->out[0] << '\n';
+    }
 }
 
 void tick(std::unique_ptr<Vaes_192_sed>& top) {
@@ -130,7 +137,7 @@ void aes_encrypt_fault_r9(std::unique_ptr<Vaes_192_sed>& top, int value, int fau
     tick(top);
 
     while (top->out_valid == 0) {
-        if (i < 10) {
+        if (i < 9) {
             tick(top);
         } else {
             tick_fault_r9(top, value, fault);
@@ -159,6 +166,14 @@ void aes_encrypt_fault_r10(std::unique_ptr<Vaes_192_sed>& top, int value, int fa
 
 int main(int argc, char ** argv)
 {
+    bool verbose = false;
+
+    if (argc > 1) {
+        if (std::string(argv[1]) == "-v") {
+            verbose = true;
+        }
+    }
+
     /* Initialize Verilator variables */
     Verilated::commandArgs(argc, argv);
 
@@ -172,18 +187,6 @@ int main(int argc, char ** argv)
     std::ofstream fault_file;
 
     std::cout << "[+] Fault simulation with Verilator\n";
-    /* Inputs */
-    /*top->key[0] = 0xa500001;
-    top->key[1] = 0x0000000;
-    top->key[2] = 0x0000000;
-    top->key[3] = 0x00f0000;
-    top->key[4] = 0x0000000;
-    top->key[5] = 0x1000000;
-
-    top->state[0] = 0x0000001;
-    top->state[1] = 0x0000000;
-    top->state[2] = 0x00f0000;
-    top->state[3] = 0x0000000;*/
 
     std::cout << "Using key:\n";
     for (i=5;i>=0;i--) {
@@ -202,14 +205,14 @@ int main(int argc, char ** argv)
 
     // Golden sample
     aes_encrypt(top);
-    write_result(top, fault_file);
+    write_result(top, fault_file, verbose);
 
     // Getting the faults in round 11
     for (i=0;i<4;i++) {
         aes_encrypt_fault_r10(top, i, g1() % 256);
-        write_result(top, fault_file);
+        write_result(top, fault_file, verbose);
         aes_encrypt_fault_r10(top, i, g1() % 256);
-        write_result(top, fault_file);
+        write_result(top, fault_file, verbose);
     }
 
     fault_file.close();
@@ -217,15 +220,15 @@ int main(int argc, char ** argv)
 
     // Golden sample
     aes_encrypt(top);
-    write_result(top, fault_file);
+    write_result(top, fault_file, verbose);
 
     // Getting the faults in round 10
     for (i=0;i<4;i++) {
         aes_encrypt_fault_r9(top, i, g1() % 256);
-        write_result(top, fault_file);
+        write_result(top, fault_file, verbose);
 
         aes_encrypt_fault_r9(top, i, g1() % 256);
-        write_result(top, fault_file);
+        write_result(top, fault_file, verbose);
     }
     fault_file.close();
     top->final();
