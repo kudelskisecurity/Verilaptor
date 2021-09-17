@@ -1,3 +1,4 @@
+![Verilaptor](img/VERILOGO.png)
 # Verilaptor
 
 To run AES0 simulation:
