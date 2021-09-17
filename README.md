@@ -1,5 +1,6 @@
-![Verilaptor](img/VERILOGO.png)
-# Verilaptor
+<p align="center">
+<img src="img/VERILOGO.png" width="300">
+</p>
 
 To run AES0 simulation:
 ```bash
