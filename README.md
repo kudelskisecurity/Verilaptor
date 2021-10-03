@@ -16,3 +16,5 @@ To run the full attack:
 $ make
 $ ./attack.sh
 ```
+
+Make sure to use at least v0.0.4 of phoenixAES.
