@@ -195,16 +195,20 @@ int main(int argc, char ** argv)
     }
 
     std::cout << "\nUsing plaintext:\n";
-    for (i=4;i>=0;i--) {
+    for (i=3;i>=0;i--) {
         top->state[i] = g1();
         std::cout << std::setw(8) << std::setfill('0') << std::hex << top->state[i];
     }
-    std::cout << "\n\n";
-    
+
     fault_file.open("tracefile_r11");
 
     // Golden sample
     aes_encrypt(top);
+    std::cout << "\nGetting ciphertext:\n";
+    for (i=3;i>=0;i--) {
+        std::cout << std::setw(8) << std::setfill('0') << std::hex << top->out[i];
+    }
+    std::cout << "\n\n";
     write_result(top, fault_file, verbose);
 
     // Getting the faults in round 11
